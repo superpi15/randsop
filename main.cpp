@@ -90,6 +90,9 @@ int main( int argc , char * argv[] ){
 	gmp_randinit_mt( randstate );
 	gmp_randseed_ui( randstate, seed );
 	std::set<impz_class,mpz_cmptor> inset;
+	typedef std::pair<impz_class,impz_class> pimpz; 
+	typedef std::vector<pimpz> vpimpz;
+	vpimpz vspec;
 	for( ; std::getline( fin, line ); nEntry++ ){
 		std::istringstream isstr( line );
 		std::string ip, op;
@@ -108,12 +111,25 @@ int main( int argc , char * argv[] ){
 			mpz_urandomb( inobj.obj, randstate, width );
 		} while( inset.find(inobj) != inset.end() );
 		inset.insert( inobj );
-		ostr.fill('0');
-		ostr.width( width );
-		ostr << mpz_class(inobj.obj).get_str(2) 
+		vspec.push_back( pimpz() );
+		mpz_init( vspec.back().first.obj );
+		mpz_set_str( vspec.back().first.obj, mpz_class(inobj.obj).get_str(2).c_str(), 2 );
+		mpz_init( vspec.back().second.obj );
+		mpz_set_str( vspec.back().second.obj, op.c_str(), 2 );
+		//ostr.fill('0');\
+		ostr.width( width );\
+		ostr << mpz_class(inobj.obj).get_str(2) \
 			<<" "<< op<<std::endl;
 	}
-	
+	std::sort( vspec.begin(), vspec.end(), mpz_pair_cmptor() );
+	for( int i=0; i<vspec.size(); i++ ){
+		ostr.fill('0');\
+		ostr.width( width );\
+		ostr<< mpz_class( vspec[i].first .obj ).get_str(2) <<" ";
+		ostr.fill('0');\
+		ostr.width( width );\
+		ostr<< mpz_class( vspec[i].second.obj ).get_str(2) <<std::endl;
+	}
 	gmp_randclear( randstate );
 
 	std::cout<<"nEntry="<< nEntry<<std::endl;
